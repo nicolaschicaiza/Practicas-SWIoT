@@ -1,8 +1,14 @@
-# electivaiot_practica_02_servidorweb
+# Desarrollo de la Guía Práctica para Implementación de un Servidor Web
 
-Respositorio de la práctica 02 para implementar un servidor web con Nest.js
+Repositorio para el desarrollo de un servidor web a través del framework Nest.js. Esta guía consta de 3 prácticas, las cuales contienen instrucciones para la implementación de los componentes necesarios para la creación del servidor.
 
----
+1. [Guía de la práctica 1: Configuración de entorno y red](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_01)
+2. [Guía de la prácticas 2: Creando un servidor REST](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_02)
+3. [Guía de la prácticas 3: Seguridad y calidad](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_03)
+
+## Recursos Utilizados para el Desarrollo
+
+# Información Inicial del Framework Nest.js
 
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
