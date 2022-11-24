@@ -1,5 +1,9 @@
 # Desarrollo de la Guía Práctica para Implementación de un Servidor Web
 
+**Nombre completo:** Jefry Nicolás Chicaiza Carrasquilla
+**Nombre de la asignatura:** Electiva - Desarrollo de Software en la Web Semántica
+**Fecha de realización:** Desde 22 de Noviembre
+
 Repositorio para el desarrollo de un servidor web a través del framework Nest.js. Esta guía consta de 3 prácticas, las cuales contienen instrucciones para la implementación de los componentes necesarios para la creación del servidor.
 
 1. [Guía de la práctica 1: Configuración de entorno y red](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_01)
