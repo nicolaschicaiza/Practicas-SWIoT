@@ -10,7 +10,7 @@ import { CarService } from './service/car/car.service';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      'mongodb://localhost:27017', { dbName: '/cardb' }
+      'mongodb://localhost:27017/cardb'
     ),
     MongooseModule.forFeature([{ name: 'Car', schema: CarSchema }])
   ],
