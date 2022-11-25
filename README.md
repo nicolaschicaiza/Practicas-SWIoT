@@ -61,7 +61,7 @@ Debido que en proyectos realizados de otra material se hizo uso del sistema de D
 
 - **Herramientas de red**
 
-<a href="https://asciinema.org/a/MKE2yer3jaTa09D24R9Jq4exF" target="_blank"><img src="https://asciinema.org/a/MKE2yer3jaTa09D24R9Jq4exF.svg" /></a>
+  <a href="https://asciinema.org/a/MKE2yer3jaTa09D24R9Jq4exF" target="_blank"><img src="https://asciinema.org/a/MKE2yer3jaTa09D24R9Jq4exF.svg" /></a>
 
 En esta demostración de los comandos ejecutados, en primer lugar se ejecuta `ip all route`, el cual muestra a demás del identificador de la red a la cual está conectado cada una de las interfaces del equipo, ya sean físicas y virtuales, también se muestra la dirección asignada al host dentro de la red, la puerta de enlace y la dirección del `broadcast` (`Interface: wlp0s20f3`[WiFi] `gateway: 192.168.20.1` ` host: 192.168.20.233``direccionamiento: Estático `).
 
@@ -137,7 +137,353 @@ nest new <name-project>
 
 A partir de aquí se empieza a construir el servicio REST propuesto por la guía.
 
+#### Desarrollo de implementación
 
+##### Temática
+
+Debido a que en la guía se especifica como requerimiento que se escoja alguna temática para su desarrollo, se dispone buscar una `dataset` de un tema en especifico dentro de la plataforma [Kaggle](https://www.kaggle.com/). Dentro de ella se encontró una dataset sobre la predicción de los precios de automóviles, se puede observar en el siguiente enlace [Car Price Prediction Challenge](https://www.kaggle.com/datasets/deepcontractor/car-price-prediction-challenge).
+
+Sin embargo, debido a que en ella se tienen numerosas características, se reduce para proceder con la implementación.
+
+[Nueva `dataset` para implementación](./dataset/car.csv)
+
+##### Creación de la Base de Datos
+
+Aunque no es requerimiento para esta guía, se implementa una base de datos en `MongoDB` para montar los datos de la `dataset` elegida.
+
+Utilizando la línea de comandos se importa la dataset al cluster local de MongoDB con el siguiente comando.
+
+```bash
+mongoimport --db cardb --collection cars --type csv --file car.csv --fields 'model,manufacturer,prodYear,price,engineVolume,mileage'
+```
+
+Luego, se verifica que se haya creado la base de datos y la colección con la `dataset` suministrada.
+
+Lo siguiente a realizar es hacer la conexión del proyecto a la base de datos, para ello primero se instala los paquetes necesarios de `MongoDb` dentro del proyecto.
+
+```bash
+yarn add @nestjs/mongoose mongoose
+```
+
+Una vez realizada la instalación, dentro del fichero [app.module.ts](./src/app.module.ts) se hace la configuración para permitir la conexión, el `script` luce de la siguiente manera.
+
+```typescript
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+
+@Module({
+  imports: [MongooseModule.forRoot('mongodb://localhost:27017/cardb')],
+})
+export class AppModule {}
+```
+
+Con esto se garatiza la conexión entre el `NodeJS` y la base de datos `MongoDB`.
+
+##### Creación Funcionamiento del CRUD
+
+Para iniciar con la creación del funcionamiento del CRUD, se construye el modelo con el que va a funcionar el proyecto. Este se hace a través de unas propiedades de la librería `mongoose`.
+
+###### Crear Esquema Mongoose
+
+Por tanto, se crea un directorio donde se van a almacenar las propiedades del modelo, el cual se llamará `schema`. Como nuestro modelo es sobre los precios de vehículos, el esquema se llamará **Car** y el fichero [car.schema.ts](./src/schema/car.schema.ts).
+
+```typescript
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+
+@Schema()
+export class Car {
+  @Prop()
+  model: string;
+  @Prop()
+  manufacturer: string;
+  @Prop()
+  prodYear: number;
+  @Prop()
+  price: number;
+  @Prop()
+  engineVolume: number;
+  @Prop()
+  mileage: string;
+}
+
+export const CarSchema = SchemaFactory.createForClass(Car);
+```
+
+Después de crear el modelo, se continua creando la lógica para el CRUD. Sin embargo, es necesario especificar el contexto a la aplicación agregando dentro del arreglo de importación el esquema a trabajar dentro del fichero [app.module.ts](./src/app.module.ts).
+
+```typescript
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { CarSchema } from './schema/car.schema';
+
+@Module({
+  imports: [
+    MongooseModule.forRoot('mongodb://localhost:27017/cardb'),
+    MongooseModule.forFeature([{ name: 'Car', schema: CarSchema }]),
+  ],
+})
+export class AppModule {}
+```
+
+###### Crear Interface
+
+Una vez creado el modelo con `mongoose`, se crea la interface del esquema para estructurar los datos del objeto. Ahora, se crea un directorio denominado `interface` en donde se creara el fichero [car.interface.ts](./src/interface/car.interface.ts). Y a partir de la clase `Document` de `mongoose` se hereda las propiedades en la interface.
+
+```typescript
+import { Document } from 'mongoose';
+
+export interface ICar extends Document {
+  readonly model: string;
+  readonly manufacturer: string;
+  readonly prodYear: number;
+  readonly price: number;
+  readonly engineVolume: number;
+  readonly mileage: string;
+}
+```
+
+###### Crear Fichero DTO
+
+Además, es necesario crear un **Objeto de Transferencia de Datos** (_DTO, Data Transfer Object_), el cual ayuda a facilitar el acceso al cuerpo de la solicitud y define el formato de los datos a enviar. Sin embargo, antes de implementar los `scripts` se deben instalar ciertas dependencias.
+
+```bash
+yarn add class-validator class-transformer
+```
+
+Luego, se continua creando un directorio denominado`dto` y ahí crear los ficheros [create-car.dto.ts](./src/dto/create-car.dto.ts) y [update-car.ts](./src/dto/update-car.dto.ts).
+
+- _create-car.dto.ts_
+
+```typescript
+import { IsNotEmpty, IsNumber, IsString, MaxLength } from 'class-validator';
+
+export class CreateCarDto {
+  @IsString()
+  @MaxLength(30)
+  @IsNotEmpty()
+  readonly model: string;
+
+  @IsString()
+  @MaxLength(30)
+  @IsNotEmpty()
+  readonly manufacturer: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  readonly prodYear: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  readonly price: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  readonly engineVolume: number;
+
+  @IsString()
+  @MaxLength(30)
+  @IsNotEmpty()
+  readonly mileage: string;
+}
+```
+
+- _update-car.dto.ts_
+
+```typescript
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateCarDto } from './create-car.dto';
+
+export class UpdateCarDto extends PartialType(CreateCarDto) {}
+```
+
+Para efectuar las funcionalidades creadas es necesario registrar en el fichero [main.ts](./src/main.ts) la función `validationPipe`, la cual permitirá que el fichero [create-car.dto.ts](./src/dto/create-car.dto.ts) trabaje.
+
+```typescript
+import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe());
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+###### Crear el Servicio
+
+Un servicio dentro de una estructura de ficheros, tiene la funcionalidad de actuar como puente entre los controladores y la base de datos. Por tanto, como este proyecto integra la base de datos en `MongoDB` es necesario implementar un servicio, así que se crea un directorio `service` y ahí se crea el fichero [car.service.ts](./src/service/car/car.service.ts).
+
+```typescript
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { CreateCarDto } from 'src/dto/create-car.dto';
+import { UpdateCarDto } from 'src/dto/update-car.dto';
+import { ICar } from 'src/interface/car.interface';
+
+@Injectable()
+export class CarService {
+  constructor(@InjectModel('Car') private carModel: Model<ICar>) {}
+
+  async createCar(createCarDto: CreateCarDto): Promise<ICar> {
+    const newCar = await new this.carModel(createCarDto);
+    return newCar.save();
+  }
+
+  async updateCar(carId: string, updateCarDto: UpdateCarDto): Promise<ICar> {
+    const existingCar = await this.carModel.findByIdAndUpdate(
+      carId,
+      updateCarDto,
+      {
+        new: true,
+      },
+    );
+
+    if (!existingCar) {
+      throw new NotFoundException(`Car #${carId} not found`);
+    }
+    return existingCar;
+  }
+
+  async getAllCars(): Promise<ICar[]> {
+    const carData = await this.carModel.find();
+
+    if (!carData || carData.length == 0) {
+      throw new NotFoundException(`Car data not found!`);
+    }
+    return carData;
+  }
+
+  async getCar(carId: string): Promise<ICar> {
+    const existingCar = await this.carModel.findById(carId).exec();
+
+    if (!existingCar) {
+      throw new NotFoundException(`Car #${carId} not found`);
+    }
+    return existingCar;
+  }
+
+  async deleteCar(carId: string): Promise<ICar> {
+    const deletedCar = await this.carModel.findByIdAndDelete(carId);
+
+    if (!deletedCar) {
+      throw new NotFoundException(`Car #${carId} not found`);
+    }
+    return deletedCar;
+  }
+}
+```
+
+Dado que el servicio es un puente, este debe contener la lógica necesaria para crear, leer, actualizar y eliminar datos dentro de la base de datos para luego ser usados por los controladores. Por dicha razón, el `script` contiene las funciones necesarias para implementar el **CRUD**.
+
+###### Crear el Controlador
+
+Los controladores como ya se menciono anteriormente utilizan las funciones creadas dentro del servicio, por lo cual dentro del controlador es donde se implementa el **CRUD**. Para ello creamos un directorio denominado `controller` y ahí crear el fichero [car.controlador.ts](./src/controller/car/car.controller.ts).
+
+```typescript
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Res,
+} from '@nestjs/common';
+import { CreateCarDto } from 'src/dto/create-car.dto';
+import { UpdateCarDto } from 'src/dto/update-car.dto';
+import { CarService } from 'src/service/car/car.service';
+
+@Controller('car')
+export class CarController {
+  constructor(private readonly carService: CarService) {}
+
+  @Post()
+  async createCar(@Res() response, @Body() createCarDto: CreateCarDto) {
+    try {
+      const newCar = await this.carService.createCar(createCarDto);
+
+      return response.status(HttpStatus.CREATED).json({
+        message: `Car has been created successfully`,
+        newCar,
+      });
+    } catch (err) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        statusCode: 400,
+        message: 'Error: Car not created!',
+        error: 'Bad Request',
+      });
+    }
+  }
+
+  @Put('/:id')
+  async updateCar(
+    @Res() response,
+    @Param('id') carId: string,
+    @Body() updateCarDto: UpdateCarDto,
+  ) {
+    try {
+      const existingCar = await this.carService.updateCar(carId, updateCarDto);
+      return response.status(HttpStatus.OK).json({
+        message: 'Car has been successfully updated',
+        existingCar,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
+  }
+
+  @Get()
+  async getCars(@Res() response) {
+    try {
+      const carData = await this.carService.getAllCars();
+      return response.status(HttpStatus.OK).json({
+        message: 'All car data found successfully',
+        carData,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
+  }
+
+  @Get('/:id')
+  async getCar(@Res() response, @Param('id') carId: string) {
+    try {
+      const existingCar = await this.carService.getCar(carId);
+      return response.status(HttpStatus.OK).json({
+        message: 'Car found successfully',
+        existingCar,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
+  }
+
+  @Delete('/:id')
+  async deleteCar(@Res() response, @Param('id') carId: string) {
+    try {
+      const deletedCar = await this.carService.deleteCar(carId);
+
+      return response.status(HttpStatus.OK).json({
+        message: 'Car deleted successfully',
+        deletedCar,
+      });
+    } catch (err) {
+      return response.status(err.status).json(err.response);
+    }
+  }
+}
+```
+
+Por ultimo, dentro del fichero [app.module.ts](./src/app.module.ts) habilitamos en el contexto el controlador del esquema para iniciar a disfrutar de la _aplicación backend_.
+
+###### Probar CRUD en Postman
+
+Para validar que la aplicación está funcionando correctamente, se hacen ciertas pruebas dentro de la plataforma [Postman](https://www.postman.com/). Se ha habilitado un _Workspace_ público para dichas pruebas al servicio [aquí](https://app.getpostman.com/join-team?invite_code=45557ff69b9683c219c9264745c09037&target_code=f072733e9b4cd96a915021a8b9f77d54)
 
 ---
 
