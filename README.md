@@ -7,6 +7,7 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
   <a href="https://www.mongodb.com/" target="blank"><img src="https://upload.wikimedia.org/wikipedia/commons/9/93/MongoDB_Logo.svg" width="200" alt="Nest Logo" /></a>
   <a href="https://mongoosejs.com/" target="blank"><img src="https://branditechture.agency/brand-logos/download/mongoose/?wpdmdl=17709&refresh=63816cff95d721669426431&ind=1661089508136&filename=Mongoose.svg" width="200" alt="Nest Logo" /></a>
+  <a href="https://www.docker.com/" target="blank"><img src="https://upload.wikimedia.org/wikipedia/commons/7/79/Docker_%28container_engine%29_logo.png" width="200" alt="Nest Logo" /></a>
 </p>
 
 - **Nombre completo:** Jefry Nicolás Chicaiza Carrasquilla - [LikendIn](https://www.linkedin.com/in/nicolas-chicaiza/)
@@ -679,3 +680,54 @@ Como ultima evidencia de funcionamiento de la implementación de la autenticaci�
 ![Evidencia de funcionamiento de la autenticación cifrada](.img/evidencia.png)
 
 Finalmente, estos pasos de protección de endpoints se deben realizar para cada modulo que tenga la capacidad de modificar o eliminar registros.
+
+### Implementación de contenedor Docker del proyecto
+
+Aunque no se especifica en la guía la realización de un contenedor para el proyecto, se aprovecha de hacerlo, ya que se especifico instalarlo.
+
+Para ello, primero se crea el fichero [Dockerfile](./Dockerfile) dentro de la raíz del proyecto. En este fichero se elabora las instrucciones que el contenedor debe ejecutar para iniciar el servicio, el cual queda de la siguiente manera.
+
+```Docker
+FROM node:18 AS development
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install -g npm@9.1.2
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+FROM node:alpine as production
+
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install --only=prod
+
+COPY . .
+
+COPY --from=development /usr/src/app/dist ./dist
+
+CMD ["node", "dist/main"]
+```
+
+Por ultimo, se crea la imagen y se ejecuta el contenedor a partir de ella.
+
+* Construcción de la imagen.
+```bash
+docker build -t practica-swiot:test .
+```
+
+* Ejecución del contenedor.
+```bash 
+docker run -d -p 3000:3000 practica-swiot:test
+```
