@@ -1,8 +1,17 @@
 # Desarrollo de la Guía Práctica para Implementación de un Servidor Web
 
-**Nombre completo:** Jefry Nicolás Chicaiza Carrasquilla
+###### Tecnologías Utilizadas
+
+<p align="center">
+  <a href="https://nodejs.org/en/" target="blank"><img src="https://nodejs.org/static/images/logo.svg" width="200" alt="Nest Logo" /></a>
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
+  <a href="https://www.mongodb.com/" target="blank"><img src="https://upload.wikimedia.org/wikipedia/commons/9/93/MongoDB_Logo.svg" width="200" alt="Nest Logo" /></a>
+  <a href="https://mongoosejs.com/" target="blank"><img src="https://branditechture.agency/brand-logos/download/mongoose/?wpdmdl=17709&refresh=63816cff95d721669426431&ind=1661089508136&filename=Mongoose.svg" width="200" alt="Nest Logo" /></a>
+</p>
+
+**Nombre completo:** Jefry Nicolás Chicaiza Carrasquilla - [LikendIn](https://www.linkedin.com/in/nicolas-chicaiza/)
 **Nombre de la asignatura:** Electiva - Desarrollo de Software en la Web Semántica
-**Fecha de realización:** Desde 22 de Noviembre
+**Fecha de realización:** Desde 22 de noviembre hasta 25 de noviembre
 
 Repositorio para el desarrollo de un servidor web a través del framework Nest.js. Esta guía consta de 3 prácticas, las cuales contienen instrucciones para la implementación de los componentes necesarios para la creación del servidor.
 
@@ -664,85 +673,8 @@ Si todo es correcto, será posible llamar al endpoint que genera un token JWT, e
 curl -X POST http://localhost:3000/car/ -d '{"model": "Spark GT", "manufacturer": "Chevrolet", "prodYear": 2015, "price": 10000, "engineVolume": 1.2, "mileage": "100000 km"}' -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6..."
 ```
 
-Como ultima evidencia de funcionamiento de la implementación de la autenticación con el servicio de JWT, se presenta el siguiente screenshot de *Postman*.
+Como ultima evidencia de funcionamiento de la implementación de la autenticación con el servicio de JWT, se presenta el siguiente screenshot de _Postman_.
 
 ![Evidencia de funcionamiento de la autenticación cifrada](.img/evidencia.png)
 
 Finalmente, estos pasos de protección de endpoints se deben realizar para cada modulo que tenga la capacidad de modificar o eliminar registros.
-
----
-
-## Información Inicial del Framework NEST.js
-
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
-
-```bash
-npm install
-```
-
-## Running the app
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
-
-<script id="asciicast-MKE2yer3jaTa09D24R9Jq4exF" src="https://asciinema.org/a/MKE2yer3jaTa09D24R9Jq4exF.js" async></script>
