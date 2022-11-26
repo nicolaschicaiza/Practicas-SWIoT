@@ -6,6 +6,8 @@
 
 Repositorio para el desarrollo de un servidor web a través del framework Nest.js. Esta guía consta de 3 prácticas, las cuales contienen instrucciones para la implementación de los componentes necesarios para la creación del servidor.
 
+Enlaces a la guía de las prácticas a realizar.
+
 1. [Guía de la práctica 1: Configuración de entorno y red](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_01)
 2. [Guía de la prácticas 2: Creando un servidor REST](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_02)
 3. [Guía de la prácticas 3: Seguridad y calidad](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_03)
@@ -485,6 +487,189 @@ Por ultimo, dentro del fichero [app.module.ts](./src/app.module.ts) habilitamos 
 
 Para validar que la aplicación está funcionando correctamente, se hacen ciertas pruebas dentro de la plataforma [Postman](https://www.postman.com/). Se ha habilitado un _Workspace_ público para dichas pruebas al servicio [aquí](https://app.getpostman.com/join-team?invite_code=45557ff69b9683c219c9264745c09037&target_code=f072733e9b4cd96a915021a8b9f77d54)
 
+### Práctica 3: Seguridad y Calidad
+
+#### Objetivos
+
+1. Aplicar los conceptos de arquitectura hexagonal.
+2. Implementar protección simple de endpoints.
+3. Implementar autenticación JWT.
+
+#### Desarrollo
+
+##### Implementación protección de endpoints
+
+En la práctica anterior se modificó el código con el objetivo de aplicar una arquitectura de patrón de diseño para separar la lógica de negocio de la lógica de infraestructura, que en comparación de estructura de ficheros que la guía recomienda es bastante idéntica. Por tanto, se pasará directamente a los pasos de implementación de la protección simple de endpoints.
+
+Como primer paso que la guía específica es instalar las dependencias necesarias, que en el caso de este proyecto se hace con el gestor de paquetes `yarn`.
+
+```bash
+yarn add @nestjs/passport passport passport-local
+yarn add @type/passport-local
+```
+
+Luego, se crea el modulo y servicio correspondiente al `auth`. Además, de la misma manera se crean los ficheros para el módulo de gestión de usuarios `users`.
+
+Una vez creado los ficheros, se procede a realizar las modificaciones empezando con el fichero [users.service.ts](./src/service/auth/auth.service.ts) como se indica en la guía.
+
+Ahora, para que el servicio este disponible, es necesario crear la configuración de este como un módulo a través del fichero [users.module.ts](./src/module/users.module.ts).
+
+Siguiendo con la guía, se procede a crear el servicio de la autenticación `auth`. Posteriormente se habilita el servicio de gestión de usuarios en el módulo de autenticación.
+
+Continuando, se establece una estrategia para validar al usuario a través del paquete `passport` instalado anteriormente. Los pasos son crear un directorio denominado `strategy` y dentro crear el fichero [local.strategy.ts](./src/strategy/local.strategy.ts).
+
+Con la estrategia creada se procede a configurar el módulo de autenticación([auth.module.ts](./src/module/auth.module.ts)) para hacer efectiva la utilización de ella.
+
+Para inicializar la protección de endpoints con el nuevo servicio, se modifica el controlador del esquema([car.controller.ts](./src/controller/car/car.controller.ts)).
+
+Al añadir la protección se verifica a través de la plataforma _Postman_ su funcionamiento, a lo que debería existir una denegación de autorización.
+
+```json
+{
+  "statusCode": 401,
+  "message": "Unauthorized"
+}
+```
+
+Sin embargo, para poder crear el objeto, la guía indica que se debe especificar un usuario y su contraseña que tenga autorización dentro del cuerpo de la solicitud.
+
+```json
+{
+  "model": "Spark GT",
+  "manufacturer": "Chevrolet",
+  "prodYear": 2015,
+  "price": 10000,
+  "engineVolume": 1.2,
+  "mileage": "100000 km",
+  "username": "john",
+  "password": "changeme"
+}
+```
+
+Aún así, se detecta un problema de seguridad y confidencialidad, dado que las credenciales del usuario utilizado para la autenticación son visibles en la solicitud.
+
+##### Autenticación con JWT
+
+Para resolver este problema de seguridad, se aplicará la autenticación con JWT. El cual se debe instalar dentro del proyecto.
+
+```bash
+yarn add @nets/jwt passport-jwt
+yarn add @types/passport-jwt
+```
+
+Posteriormente, se modifica el fichero [auth.service.ts](./src/service/auth/auth.service.ts) adicionando el método login y algunas dependencias.
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
+...
+@Injectable()
+export class AuthService {
+  constructor(
+    private userService: UserService,
+    private jwtService: JwTService,
+  ) {}
+...
+    return null;
+  }
+
+  async login(user: any) {
+    const payload = { username: user.username, sub: user.userId };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+}
+```
+
+Ahora, para permitir a los usuarios iniciar sesión se implementará un endpoint que vierta las credenciales de usuario en un token JWT a través de un controlador de `auth`([auth.controller.ts](./src/controller/auth/auth.controller.ts))
+
+Además, se crea una constante para el registro secreto de JWT en [./src/constants.ts](./src/constants.ts).
+
+Para habilitar la funcionalidad se crea una estrategia para que `passport` identifique donde se encuentra la el token en una petición y cual es el secreto que permite validarlo. Por tanto, se crea [jwt-auth.strategy.ts](./src/strategy/jwt-auth.strategy.ts).
+
+Una vez adicionado la funcionalidad se configura el servicio JWT a través del fichero [auth.module.ts](./src/module/auth.module.ts).
+
+```typescript
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { AuthController } from 'src/controller/auth/auth.controller';
+import { LocalStrategy } from 'src/strategy/local.strategy';
+import { AuthService } from '../service/auth/auth.service';
+import { UsersModule } from './users.module';
+
+@Module({
+  controllers: [AuthController],
+  imports: [
+    UsersModule,
+    PassportModule,
+    JwtModule.register({
+      secret: 'Este es el secreto para generar JWT',
+      signOptions: { expiresIn: '60m' },
+    }),
+  ], //! Importa el módulo de usuarios
+  providers: [AuthService, LocalStrategy],
+  exports: [AuthService],
+})
+export class AuthModule {}
+```
+
+Lo siguiente será implementar un guarda para que intercepte un token JWT y así poder proteger los endpoints que sea de nuestro interés. Por tanto, se crea un directorio denominado `guard` y dentro el fichero [jwt-auth.guard.ts](./src/guard/jwt-auth.guard.ts).
+
+Adicional, se debe registrar los nuevos componentes en el módulo [auth.module.ts](./src/module/auth.module.ts)
+
+```typescript
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { jwtSecret } from 'src/constants';
+import { AuthController } from 'src/controller/auth/auth.controller';
+import { JwtAuthGuard } from 'src/guard/jwt-auth.guard';
+import { JwtStrategy } from 'src/strategy/jwt-auth.strategy';
+import { LocalStrategy } from 'src/strategy/local.strategy';
+import { AuthService } from '../service/auth/auth.service';
+import { UsersModule } from './users.module';
+
+@Module({
+  controllers: [AuthController],
+  imports: [
+    UsersModule,
+    PassportModule,
+    JwtModule.register({
+      secret: jwtSecret,
+      signOptions: { expiresIn: '60m' },
+    }),
+  ],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtAuthGuard],
+  exports: [AuthService],
+})
+export class AuthModule {}
+```
+
+Si todo ha salido a la perfección, será posible llamar al endpoint que genera un token JWT, esto se podrá validar con CURL.
+
+```bash
+curl -X POST http://localhost:3000/auth/login -d '{"username": "john", "password": "changeme" }' -H "Content-Type: application/json"
+```
+
+Su salida será un token, el cual es necesario guardarlo para los pasos siguientes.
+
+Ahora, se realiza una pequeña modificación en el fichero [car.controller.ts](./src/controller/car/car.controller.ts) para proteger el endpoint POST.
+
+Si todo es correcto, será posible llamar al endpoint que genera un token JWT, esto se podrá validar con CURL utilizando el token generado anteriormente.
+
+```bash
+curl -X POST http://localhost:3000/car/ -d '{"model": "Spark GT", "manufacturer": "Chevrolet", "prodYear": 2015, "price": 10000, "engineVolume": 1.2, "mileage": "100000 km"}' -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6..."
+```
+
+Como ultima evidencia de funcionamiento de la implementación de la autenticación con el servicio de JWT, se presenta el siguiente screenshot de *Postman*.
+
+![Evidencia de funcionamiento de la autenticación cifrada](.img/evidencia.png)
+
+Finalmente, estos pasos de protección de endpoints se deben realizar para cada modulo que tenga la capacidad de modificar o eliminar registros.
+
 ---
 
 ## Información Inicial del Framework NEST.js
@@ -492,9 +677,6 @@ Para validar que la aplicación está funcionando correctamente, se hacen cierta
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
 
   <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
     <p align="center">
@@ -520,7 +702,7 @@ Para validar que la aplicación está funcionando correctamente, se hacen cierta
 ## Installation
 
 ```bash
-$ npm install
+npm install
 ```
 
 ## Running the app

@@ -1,13 +1,15 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Res, UseGuards } from '@nestjs/common';
 import { CreateCarDto } from 'src/dto/create-car.dto';
 import { UpdateCarDto } from 'src/dto/update-car.dto';
+import { JwtAuthGuard } from 'src/guard/jwt-auth.guard';
 import { CarService } from 'src/service/car/car.service';
 
 @Controller('car')
 export class CarController {
   constructor(private readonly carService: CarService) { }
 
+  @UseGuards(JwtAuthGuard) //AuthGuard('local')) //! se adiciona esta anotación
   @Post()
   async createCar(@Res() response, @Body() createCarDto: CreateCarDto) {
     try {
