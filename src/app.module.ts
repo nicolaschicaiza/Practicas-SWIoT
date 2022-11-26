@@ -10,7 +10,8 @@ import { UsersModule } from './module/users.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      'mongodb://localhost:27017/cardb'
+      // 'mongodb://localhost:27017/cardb'
+      'mongodb+srv://nepturno:JOwqD3eoHx8otRgy@practica-swiot.ctzg29i.mongodb.net/cardb'
     ),
     MongooseModule.forFeature([{ name: 'Car', schema: CarSchema }]),
     AuthModule,

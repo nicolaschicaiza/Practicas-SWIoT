@@ -9,9 +9,9 @@
   <a href="https://mongoosejs.com/" target="blank"><img src="https://branditechture.agency/brand-logos/download/mongoose/?wpdmdl=17709&refresh=63816cff95d721669426431&ind=1661089508136&filename=Mongoose.svg" width="200" alt="Nest Logo" /></a>
 </p>
 
-**Nombre completo:** Jefry Nicolás Chicaiza Carrasquilla - [LikendIn](https://www.linkedin.com/in/nicolas-chicaiza/)
-**Nombre de la asignatura:** Electiva - Desarrollo de Software en la Web Semántica
-**Fecha de realización:** Desde 22 de noviembre hasta 25 de noviembre
+- **Nombre completo:** Jefry Nicolás Chicaiza Carrasquilla - [LikendIn](https://www.linkedin.com/in/nicolas-chicaiza/)
+- **Nombre de la asignatura:** Electiva - Desarrollo de Software en la Web Semántica
+- **Fecha de realización:** Desde 22 de noviembre hasta 25 de noviembre
 
 Repositorio para el desarrollo de un servidor web a través del framework Nest.js. Esta guía consta de 3 prácticas, las cuales contienen instrucciones para la implementación de los componentes necesarios para la creación del servidor.
 
@@ -44,13 +44,14 @@ En la computadora especificada anteriormente se tiene instalado los siguientes r
 - **Plataforma HTTP**: Postman
 - **Navegador**: Firefox
 - **Linux Shell**: ZSH
-- **Plataformas de virtualización**: VirtualBox, Virtual Manager, Docker (aún que no es virtualización está instalado)
+- **Plataformas de virtualización**: VirtualBox, Virtual Manager, Docker (aunque no es virtualización está instalado)
+- **Otros**: NodeJS, yarn, npm, Github-cli, Firebase-cli, Python3, pip, etc.
 
 ---
 
 ## Desarrollo
 
-### Práctica 1: Configuración de entorno y red
+### Práctica 1: Configuración de Entorno y Red
 
 #### Objetivos
 
