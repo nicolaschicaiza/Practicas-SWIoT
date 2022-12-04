@@ -749,3 +749,12 @@ El desplegué de la aplicación se hace tal cual como se indica en la [guía](ht
 ##### Conectando a una base de datos
 
 En prácticas que se realizaron anteriormente se realizo la conexión a la base de datos en MongoDB a traves de Mongoose.
+
+---
+### Petición al servicio
+
+Enlace para acceder a la aplicación que está desplegada en la nube [URL](https://cv79a8.deta.dev/car).
+
+```bash
+curl https://cv79a8.deta.dev/car
+```
