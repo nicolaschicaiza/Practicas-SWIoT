@@ -21,6 +21,7 @@ Enlaces a la guía de las prácticas a realizar.
 1. [Guía de la práctica 1: Configuración de entorno y red](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_01)
 2. [Guía de la prácticas 2: Creando un servidor REST](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_02)
 3. [Guía de la prácticas 3: Seguridad y calidad](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_03)
+4. [Guía de la práctica 4: Desplegando en la nube](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_04)
 
 ---
 
@@ -731,3 +732,20 @@ docker build -t practica-swiot:test .
 ```bash 
 docker run -d -p 3000:3000 practica-swiot:test
 ```
+
+### Práctica 4: Desplegando en la nube
+
+#### Objetivos
+
+1. Desplegar un a aplicación en la nube
+2. Agregar una base de datos a la aplicación.
+
+#### Desarrollo
+
+##### Desplegando una aplicación en la nube
+
+El desplegué de la aplicación se hace tal cual como se indica en la [guía](https://github.com/mfdogalindo/UC-Practicas-SWoT/tree/main/Practica_04), dicho desplegué se realiza en la plataforma [Deta.sh](https://deta.sh).
+
+##### Conectando a una base de datos
+
+En prácticas que se realizaron anteriormente se realizo la conexión a la base de datos en MongoDB a traves de Mongoose.
